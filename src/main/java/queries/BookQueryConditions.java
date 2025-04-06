@@ -4,13 +4,13 @@ import entities.Book;
 
 /**
  * Note: (1) all non-null attributes should be used as query
- *       conditions and connected by "AND" operations.
- *       (2) for range query of an attribute, the maximum and
- *       minimum values use closed intervals.
- *       eg: minA=x, maxA=y ==> x <= A <= y
- *           minA=null, maxA=y ==> A <= y
- *           minA=x, maxA=null ==> A >= x
- * */
+ * conditions and connected by "AND" operations.
+ * (2) for range query of an attribute, the maximum and
+ * minimum values use closed intervals.
+ * eg: minA=x, maxA=y ==> x <= A <= y
+ * minA=null, maxA=y ==> A <= y
+ * minA=x, maxA=null ==> A >= x
+ */
 public class BookQueryConditions {
     /* Note: use exact matching */
     private String category;
@@ -121,4 +121,40 @@ public class BookQueryConditions {
     public void setSortOrder(SortOrder sortOrder) {
         this.sortOrder = sortOrder;
     }
+
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("BookQueryConditions{");
+
+        if (category != null) {
+            sb.append("category='").append(category).append("', ");
+        }
+        if (title != null) {
+            sb.append("title='").append(title).append("', ");
+        }
+        if (press != null) {
+            sb.append("press='").append(press).append("', ");
+        }
+        if (minPublishYear != null) {
+            sb.append("minPublishYear=").append(minPublishYear).append(", ");
+        }
+        if (maxPublishYear != null) {
+            sb.append("maxPublishYear=").append(maxPublishYear).append(", ");
+        }
+        if (author != null) {
+            sb.append("author='").append(author).append("', ");
+        }
+        if (minPrice != null) {
+            sb.append("minPrice=").append(minPrice).append(", ");
+        }
+        if (maxPrice != null) {
+            sb.append("maxPrice=").append(maxPrice).append(", ");
+        }
+        sb.append("sortBy=").append(sortBy).append(", ");
+        sb.append("sortOrder=").append(sortOrder);
+
+        sb.append("}");
+        return sb.toString();
+    }
+
 }
