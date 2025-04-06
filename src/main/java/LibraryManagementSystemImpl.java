@@ -268,7 +268,7 @@ public class LibraryManagementSystemImpl implements LibraryManagementSystem {
 
             sqlBuilder.append(" ORDER BY ").append(conditions.getSortBy().toString().toLowerCase());
             sqlBuilder.append(" ").append(conditions.getSortOrder().toString());
-
+            sqlBuilder.append(", book_id ASC");
             PreparedStatement stmt = conn.prepareStatement(sqlBuilder.toString());
             for (int i = 0; i < params.size(); i++) {
                 Object param = params.get(i);
