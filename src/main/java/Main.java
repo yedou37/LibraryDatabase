@@ -38,93 +38,96 @@ public class Main {
             /* do somethings */
             LibraryManagementSystem lms = new LibraryManagementSystemImpl(connector);
             ApiResult restartRes = lms.resetDatabase();
+            if (!restartRes.ok)
+                log.severe("failed to reset database" + restartRes.message.toString());
+            Scanner scanner = new Scanner(System.in);
+            String command = "";
+            while (!(command == "exit")) {
+                System.out.println(
+                        "请输入命令 (storeRandomBook, storeBook, registerCard, borrowBook, returnBook, showBorrowHistory, showCards, resetDatabase, exit): ");
+                command = scanner.nextLine().trim().toLowerCase();
+                switch (command) {
+                    case "storeRamdombook": {
+                        Book book = RandomData.randomBook();
+                        ApiResult storeRes = lms.storeBook(book);
+                        if (storeRes.ok) {
+                            log.info("Success to store book. " + storeRes.toString());
+                        } else {
+                            log.severe("Failed to store book. " + storeRes.message.toString());
+                        }
+                        break;
+                    }
+                    case "storebook": {
+                        Book book = new Book();
+                        System.out.println("请输入书名: ");
+                        book.setTitle(scanner.nextLine().trim());
+                        System.out.println("请输入作者: ");
+                        book.setAuthor(scanner.nextLine().trim());
+                        System.out.println("请输入出版社: ");
+                        book.setPress(scanner.nextLine().trim());
+                        System.out.println("请输入出版年份: ");
+                        book.setPublishYear(Integer.parseInt(scanner.nextLine().trim()));
+                        System.out.println("请输入价格: ");
+                        book.setPrice(Double.parseDouble(scanner.nextLine().trim()));
+                        System.out.println("请输入分类: ");
+                        book.setCategory(scanner.nextLine().trim());
+                        System.out.println("请输入库存: ");
+                        book.setStock(Integer.parseInt(scanner.nextLine().trim()));
+                        ApiResult storeRes = lms.storeBook(book);
+                        if (storeRes.ok) {
+                            log.info("Success to store book. " + storeRes.toString());
+                        } else {
+                            log.severe("Failed to store book. " + storeRes.message.toString());
+                        }
+                        break;
+                    }
+                    case "registercard": {
+                        Card card = new Card();
+                        System.out.println("请输入卡号: ");
+                        card.setCardId(Integer.parseInt(scanner.nextLine().trim()));
+                        System.out.println("请输入姓名: ");
+                        card.setName(scanner.nextLine().trim());
+                        System.out.println("请输入部门: ");
+                        card.setDepartment(scanner.nextLine().trim());
+                        System.out.println("请输入卡类型 (0: 学生卡, 1: 教职工卡): ");
+                        int type = Integer.parseInt(scanner.nextLine().trim());
+                        if (type == 0) {
+                            card.setType(Card.CardType.Student);
+                        } else if (type == 1) {
+                            card.setType(Card.CardType.Teacher);
+                        } else {
+                            log.severe("Invalid card type.");
+                            break;
+                        }
+                        ApiResult registerRes = lms.registerCard(card);
+                        if (registerRes.ok) {
+                            log.info("Success to register card. " + registerRes.toString());
+                        } else {
+                            log.severe("Failed to register card. " + registerRes.message.toString());
+                        }
+                    }
+                    case "showcards": {
+                        ApiResult cardsRes = lms.showCards();
+                        if (cardsRes.ok) {
+                            log.info("所有借阅卡信息: " + cardsRes.toString());
+                        } else {
+                            log.severe("获取借阅卡信息失败. " + cardsRes.message.toString());
+                        }
+                        break;
+                    }
 
-            Set<Book> bookSet = new HashSet<>();
-            while (bookSet.size() < 50) {
-                bookSet.add(RandomData.randomBook());
-            }
-            List<Book> bookList = new ArrayList<>(bookSet);
-            ApiResult res = lms.storeBook(bookList);
-            if (res.ok) {
-                log.info("Success to store books. " + res.message.toString());
-            } else {
-                log.severe("Failed to store books. " + res.message.toString());
-            }
-
-            List<Card> cardList = new ArrayList<>();
-            for (int i = 0; i < 50; i++) {
-                Card c = new Card();
-                c.setName(String.format("User%05d", i));
-                c.setDepartment(RandomData.randomDepartment());
-                c.setType(Card.CardType.random());
-                cardList.add(c);
-                if (lms.registerCard(c).ok) {
-                    log.info("Success to register card. " + c.toString());
-                } else {
-                    log.severe("Failed to register card. " + c.toString());
-                }
-            }
-            List<Borrow> borrowList = new ArrayList<>();
-            PriorityQueue<Long> mills = new PriorityQueue<>();
-            for (int i = 0; i < 100 * 2; i++) {
-                mills.add(RandomData.randomTime());
-            }
-            for (int i = 0; i < 100;) {
-                Book b = bookList.get(RandomUtils.nextInt(0, 50));
-                if (b.getStock() == 0) {
-                    continue;
-                }
-                i++;
-                Card c = cardList.get(RandomUtils.nextInt(0, 50));
-                Borrow r = new Borrow();
-                r.setCardId(c.getCardId());
-                r.setBookId(b.getBookId());
-                r.setBorrowTime(mills.poll());
-                r.setReturnTime(mills.poll());
-                if (lms.borrowBook(r).ok) {
-                    log.info("Success to borrow book. " + r.toString());
-                } else {
-                    log.severe("Failed to borrow book. " + r.toString());
                 }
 
-                if (lms.returnBook(r).ok) {
-                    log.info("Success to return book. " + r.toString());
-                } else {
-                    log.severe("Failed to return book. " + r.toString());
-                }
-
-                borrowList.add(r);
             }
-            /*
-             * if (restartRes.ok) {
-             * log.info("OK");
-             * }
-             * Book book = new Book("Computer Science", "Introduction to Algorithms",
-             * "MIT Press", 2009, "CLRS", 36.8,
-             * 100);
-             * ApiResult storeRes = lms.storeBook(book);
-             * if (storeRes.ok) {
-             * log.info("Success to store book. " + storeRes.message.toString());
-             * }
-             * BookQueryConditions conditions = new BookQueryConditions();
-             * conditions.setCategory("Computer Science");
-             * ApiResult result = lms.queryBook(conditions);
-             * if (result.ok) {
-             * log.info("Success to query books. " + result.payload.toString());
-             * BookQueryResults queryResults = (BookQueryResults) result.payload;
-             * List<Book> books = (List<Book>) queryResults.getResults();
-             * log.info("Books: " + books.get(0).toString());
-             * } else {
-             * log.severe("Failed to query books. " + result.message);
-             * }
-             */
             // release database connection handler
             if (connector.release()) {
                 log.info("Success to release connection.");
             } else {
                 log.warning("Failed to release connection.");
             }
-        } catch (Exception e) {
+        } catch (
+
+        Exception e) {
             e.printStackTrace();
         }
     }
