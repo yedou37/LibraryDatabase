@@ -1,3 +1,4 @@
+package library.system.controller;
 
 import queries.ApiResult;
 import queries.BookQueryConditions;
@@ -5,17 +6,17 @@ import queries.BookQueryResults;
 import utils.ConnectConfig;
 import utils.DatabaseConnector;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RestController;
 
 import entities.Book;
+import library.system.LibraryManagementSystem;
+import library.system.LibraryManagementSystemImpl;
 
 import java.sql.SQLException;
 
 @RestController
-@RequestMapping("/api/books")
+@RequestMapping("/books")
 public class BookController {
 
     private final LibraryManagementSystem library;
@@ -52,16 +53,43 @@ public class BookController {
         }
     }
 
-    // 你可以根据需要添加其他的方法，例如添加图书、删除图书等
-
-    // 示例：添加图书
-    @GetMapping("/add")
+    @PostMapping("/add")
     public ApiResult addBook(@RequestBody Book book) {
         try {
             // 添加图书
             return library.storeBook(book);
         } catch (Exception e) {
             throw new RuntimeException("Error adding book.", e);
+        }
+    }
+
+    @DeleteMapping("/delete/{bookId}")
+    public ApiResult deleteBook(@PathVariable int bookId) {
+        try {
+            // 删除图书
+            return library.removeBook(bookId);
+        } catch (Exception e) {
+            throw new RuntimeException("Error deleting book.", e);
+        }
+    }
+
+    @PutMapping("/modify")
+    public ApiResult modifyBook(@RequestBody Book book) {
+        try {
+            // 修改图书信息
+            return library.modifyBookInfo(book);
+        } catch (Exception e) {
+            throw new RuntimeException("Error modifying book.", e);
+        }
+    }
+
+    @GetMapping("/reset")
+    public ApiResult resetDatabase() {
+        try {
+            // 重置数据库
+            return library.resetDatabase();
+        } catch (Exception e) {
+            throw new RuntimeException("Error resetting database.", e);
         }
     }
 }

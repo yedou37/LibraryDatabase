@@ -1,3 +1,5 @@
+package library.system;
+
 import entities.Book;
 import entities.Borrow;
 import entities.Card;
@@ -9,7 +11,9 @@ import utils.DatabaseConnector;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.stereotype.Service;
 
+@Service
 public class LibraryManagementSystemImpl implements LibraryManagementSystem {
 
     private final DatabaseConnector connector;
