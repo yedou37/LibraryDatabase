@@ -90,12 +90,12 @@
             <artifactId>spring-boot-starter-data-couchbase</artifactId>
         </dependency>
 
-        <!-- 如果使用 MongoDB, 则需要此依赖 -->
-        <!-- 如果不使用 MongoDB，可以删除此依赖 -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-mongodb</artifactId>
+            <groupId>org.mybatis.spring.boot</groupId>
+            <artifactId>mybatis-spring-boot-starter</artifactId>
+            <version>2.2.0</version> <!-- 请根据需要选择合适的版本 -->
         </dependency>
+
     </dependencies>
 
     <build>

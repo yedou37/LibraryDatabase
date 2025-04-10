@@ -21,25 +21,36 @@
           float: right;
         "
         clearable
+        placeholder="输入关键词搜索"
+        @input="handleSearch"
       />
     </div>
 
     <!-- 查询框 -->
     <div style="width: 30%; margin: 0 auto; padding-top: 5vh">
       <el-input
-        v-model="this.toQuery"
+        v-model="toQuery"
         style="display: inline"
         placeholder="输入借书证ID"
       ></el-input>
-      <el-button style="margin-left: 10px" type="primary" @click="QueryBorrows"
+      <el-button
+        style="margin-left: 10px"
+        type="primary"
+        :loading="isLoading"
+        @click="QueryBorrows"
         >查询</el-button
       >
+    </div>
+
+    <!-- 错误提示 -->
+    <div v-if="hasError" style="color: red; text-align: center; margin: 20px 0">
+      查询失败，请检查借书证ID或稍后再试
     </div>
 
     <!-- 结果表格 -->
     <el-table
       v-if="isShow"
-      :data="fitlerTableData"
+      :data="filteredTableData"
       height="600"
       :default-sort="{ prop: 'borrowTime', order: 'ascending' }"
       :table-layout="'auto'"
@@ -51,11 +62,27 @@
         max-width: 80vw;
       "
     >
-      <el-table-column prop="cardID" label="借书证ID" />
-      <el-table-column prop="bookID" label="图书ID" sortable />
-      <el-table-column prop="borrowTime" label="借出时间" sortable />
-      <el-table-column prop="returnTime" label="归还时间" sortable />
+      <el-table-column prop="cardId" label="借书证ID" />
+      <el-table-column prop="bookId" label="图书ID" sortable />
+      <el-table-column label="借出时间" sortable>
+        <template #default="scope">
+          {{ formatDate(scope.row.borrowTime) }}
+        </template>
+      </el-table-column>
+      <el-table-column label="归还时间" sortable>
+        <template #default="scope">
+          {{ formatDate(scope.row.returnTime) }}
+        </template>
+      </el-table-column>
     </el-table>
+
+    <!-- 无数据提示 -->
+    <div
+      v-if="isShow && tableData.length === 0"
+      style="text-align: center; margin: 50px 0"
+    >
+      没有找到相关借书记录
+    </div>
   </el-scrollbar>
 </template>
 
@@ -67,9 +94,11 @@ export default {
   data() {
     return {
       isShow: false, // 结果表格展示状态
+      isLoading: false, // 加载状态
+      hasError: false, // 是否显示错误提示
       tableData: [
         {
-          // 列表项
+          // 初始示例数据
           cardID: 1,
           bookID: 1,
           borrowTime: "2024.03.04 21:48",
@@ -82,29 +111,59 @@ export default {
     };
   },
   computed: {
-    fitlerTableData() {
-      // 搜索规则
-      return this.tableData.filter(
-        (tuple) =>
-          this.toSearch == "" || // 搜索框为空，即不搜索
-          tuple.bookID == this.toSearch || // 图书号与搜索要求一致
-          tuple.borrowTime.toString().includes(this.toSearch) || // 借出时间包含搜索要求
-          tuple.returnTime.toString().includes(this.toSearch) // 归还时间包含搜索要求
-      );
+    filteredTableData() {
+      // 搜索和过滤逻辑
+      return this.tableData.filter((record) => {
+        if (this.toSearch === "") return true; // 搜索框为空，不进行过滤
+        return (
+          record.bookID.toString().includes(this.toSearch) ||
+          record.borrowTime.includes(this.toSearch) ||
+          record.returnTime.includes(this.toSearch)
+        );
+      });
     },
   },
   methods: {
     async QueryBorrows() {
-      this.tableData = []; // 清空列表
-      let response = await axios.get("/borrow", {
-        params: { cardID: this.toQuery },
-      }); // 向/borrow发出GET请求，参数为cardID=this.toQuery
-      let borrows = response.data; // 获取响应负载
-      borrows.forEach((borrow) => {
-        // 对于每一个借书记录
-        this.tableData.push(borrow); // 将它加入到列表项中
+      this.isLoading = true;
+      this.hasError = false;
+      this.tableData = [];
+
+      try {
+        // 将 cardID 作为路径变量传递
+        const response = await axios.get(`/api/borrow/${this.toQuery}`);
+        this.tableData = response.data;
+        this.isShow = true;
+      } catch (error) {
+        console.error("查询失败:", error);
+        this.hasError = true;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+    formatDate(unixTimestamp) {
+      if (unixTimestamp === 0) {
+        return "未归还";
+      }
+      // 创建一个新的 Date 对象
+      const date = new Date(unixTimestamp * 1000);
+      // 获取日期和时间并格式化
+      return date.toLocaleString("zh-CN", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false,
       });
-      this.isShow = true; // 显示结果列表
+    },
+
+    handleSearch() {
+      // 搜索结果实时响应
+      this.$nextTick(() => {
+        this.filteredTableData; // 触发计算属性重新计算
+      });
     },
   },
 };

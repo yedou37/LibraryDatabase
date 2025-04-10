@@ -9,6 +9,9 @@ import queries.BookQueryConditions;
 import java.sql.PreparedStatement;
 import java.util.List;
 
+import org.springframework.stereotype.Component;
+
+@Component
 /**
  * Note:
  * (1) all functions in this interface will be regarded as a

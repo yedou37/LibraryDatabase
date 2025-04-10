@@ -30,13 +30,13 @@
       <div
         class="cardBox"
         v-for="card in cards"
-        v-show="card.name.includes(toSearch)"
-        :key="card.id"
+        f-visible="card.name.includes(toSearch) || toSearch === ''"
+        :key="card.cardId"
       >
         <div>
           <!-- 卡片标题 -->
           <div style="font-size: 25px; font-weight: bold">
-            No. {{ card.id }}
+            No. {{ card.cardId }}
           </div>
 
           <el-divider />
@@ -62,7 +62,7 @@
               type="primary"
               :icon="Edit"
               @click="
-                (this.toModifyInfo.id = card.id),
+                (this.toModifyInfo.id = card.cardId),
                   (this.toModifyInfo.name = card.name),
                   (this.toModifyInfo.department = card.department),
                   (this.toModifyInfo.type = card.type),
@@ -75,7 +75,7 @@
               :icon="Delete"
               circle
               @click="
-                (this.toRemove = card.id), (this.removeCardVisible = true)
+                (this.toRemove = card.cardId), (this.removeCardVisible = true)
               "
               style="margin-left: 30px"
             />
@@ -89,7 +89,7 @@
         @click="
           (newCardInfo.name = ''),
             (newCardInfo.department = ''),
-            (newCardInfo.type = '学生'),
+            (newCardInfo.type = 'Student'),
             (newCardVisible = true)
         "
       >
@@ -271,13 +271,13 @@ export default {
       cards: [
         {
           // 借书证列表
-          id: 1,
+          cardId: 1,
           name: "小明",
           department: "计算机学院",
           type: "学生",
         },
         {
-          id: 2,
+          cardId: 2,
           name: "王老师",
           department: "计算机学院",
           type: "教师",
@@ -286,15 +286,15 @@ export default {
       Delete,
       Edit,
       Search,
-      toSearch: "", // 搜索内容
+      toSearch: "", // 搜索框内容
       types: [
         // 借书证类型
         {
-          value: "教师",
+          value: "Teacher",
           label: "教师",
         },
         {
-          value: "学生",
+          value: "Student",
           label: "学生",
         },
       ],
@@ -305,15 +305,15 @@ export default {
         // 待新建借书证信息
         name: "",
         department: "",
-        type: "学生",
+        type: "Student",
       },
       modifyCardVisible: false, // 修改信息对话框可见性
       toModifyInfo: {
         // 待修改借书证信息
-        id: 0,
+        cardId: 0,
         name: "",
         department: "",
-        type: "学生",
+        type: "Student",
       },
     };
   },
@@ -321,7 +321,7 @@ export default {
     ConfirmNewCard() {
       // 发出POST请求
       axios
-        .post("/card", {
+        .post("api/card", {
           // 请求体
           name: this.newCardInfo.name,
           department: this.newCardInfo.department,
@@ -336,7 +336,7 @@ export default {
     ConfirmModifyCard() {
       // 发出PUT请求
       axios
-        .put("/card", {
+        .put("/api/card", {
           // 请求体
           id: this.toModifyInfo.id,
           name: this.toModifyInfo.name,
@@ -356,7 +356,7 @@ export default {
     ConfirmRemoveCard() {
       // 发出DELETE请求
       axios
-        .delete("/card/" + this.toRemove)
+        .delete("/api/card/" + this.toRemove)
         .then((response) => {
           ElMessage.success("借书证删除成功"); // 显示消息提醒
           this.removeCardVisible = false; // 将对话框设置为不可见
@@ -369,13 +369,21 @@ export default {
 
     QueryCards() {
       this.cards = []; // 清空列表
-      let response = axios
-        .get("/card") // 向/card发出GET请求
+      axios
+        .get("/api/card") // 向/card发出GET请求
         .then((response) => {
           let cards = response.data; // 接收响应负载
-          cards.forEach((card) => {
+          const cardArray = cards.cards;
+          console.log("Received cards list:", cardArray); // 提示输出：接收到的卡片列表
+          cardArray.forEach((cardArray) => {
             // 对于每个借书证
-            this.cards.push(card); // 将其加入到列表中
+            this.cards.push({
+              cardId: cardArray.cardId,
+              name: cardArray.name,
+              department: cardArray.department,
+              type: cardArray.type,
+            });
+            console.log("Updated cards list:", this.cards); // 提示输出：更新后的卡片列表
           });
         });
     },
