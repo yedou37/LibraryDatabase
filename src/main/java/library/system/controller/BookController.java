@@ -149,6 +149,21 @@ public class BookController {
 
     }
 
+    @PutMapping("/card")
+    public boolean modifyCard(@RequestBody Card card) {
+        try {
+
+            ApiResult resModify = library.modifyCardInfo(card);
+            if (!resModify.ok) {
+                throw new RuntimeException("Failed to modify card: " + resModify.message);
+            }
+            return true;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error modifying card.", e);
+        }
+    }
+
     @GetMapping("/borrow/{cardId}")
     public List<BorrowHistories.Item> showBorrowHis(@PathVariable int cardId) {
         try {

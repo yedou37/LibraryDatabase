@@ -310,7 +310,6 @@ export default {
       modifyCardVisible: false, // 修改信息对话框可见性
       toModifyInfo: {
         // 待修改借书证信息
-        cardId: 0,
         name: "",
         department: "",
         type: "Student",
@@ -338,7 +337,7 @@ export default {
       axios
         .put("/api/card", {
           // 请求体
-          id: this.toModifyInfo.id,
+          cardId: this.toModifyInfo.id,
           name: this.toModifyInfo.name,
           department: this.toModifyInfo.department,
           type: this.toModifyInfo.type,

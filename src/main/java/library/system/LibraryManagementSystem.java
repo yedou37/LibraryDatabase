@@ -177,4 +177,6 @@ public interface LibraryManagementSystem {
      */
     ApiResult resetDatabase();
 
+    ApiResult modifyCardInfo(Card card);
+
 }
