@@ -10,20 +10,6 @@
       "
     >
       借书记录查询
-      <el-input
-        v-model="toSearch"
-        :prefix-icon="Search"
-        style="
-          width: 15vw;
-          min-width: 150px;
-          margin-left: 30px;
-          margin-right: 30px;
-          float: right;
-        "
-        clearable
-        placeholder="输入关键词搜索"
-        @input="handleSearch"
-      />
     </div>
 
     <!-- 查询框 -->
@@ -74,6 +60,23 @@
           {{ formatDate(scope.row.returnTime) }}
         </template>
       </el-table-column>
+      <el-table-column label="操作">
+        <template #default="scope">
+          <el-button
+            v-if="scope.row.returnTime === 0"
+            size="mini"
+            type="primary"
+            @click="
+              returnBook(
+                scope.row.bookId,
+                scope.row.cardId,
+                scope.row.borrowTime
+              )
+            "
+            >还书</el-button
+          >
+        </template>
+      </el-table-column>
     </el-table>
 
     <!-- 无数据提示 -->
@@ -99,26 +102,25 @@ export default {
       tableData: [
         {
           // 初始示例数据
-          cardID: 1,
-          bookID: 1,
+          cardId: 1,
+          bookId: 1,
           borrowTime: "2024.03.04 21:48",
-          returnTime: "2024.03.04 21:49",
+          returnTime: 0,
         },
       ],
       toQuery: "", // 待查询内容(对某一借书证号进行查询)
-      toSearch: "", // 待搜索内容(对查询到的结果进行搜索)
       Search,
     };
   },
   computed: {
     filteredTableData() {
-      // 搜索和过滤逻辑
+      // 搜索结果实时响应
       return this.tableData.filter((record) => {
-        if (this.toSearch === "") return true; // 搜索框为空，不进行过滤
+        if (this.toQuery === "") return true; // 搜索结果实时响应
         return (
-          record.bookID.toString().includes(this.toSearch) ||
-          record.borrowTime.includes(this.toSearch) ||
-          record.returnTime.includes(this.toSearch)
+          String(record.bookId).includes(this.toQuery) ||
+          String(record.borrowTime).includes(this.toQuery) ||
+          String(record.returnTime).includes(this.toQuery)
         );
       });
     },
@@ -146,7 +148,7 @@ export default {
         return "未归还";
       }
       // 创建一个新的 Date 对象
-      const date = new Date(unixTimestamp * 1000);
+      const date = new Date(unixTimestamp);
       // 获取日期和时间并格式化
       return date.toLocaleString("zh-CN", {
         year: "numeric",
@@ -158,12 +160,30 @@ export default {
         hour12: false,
       });
     },
+    async returnBook(bookId, cardId, borrowTime) {
+      this.isLoading = true;
+      this.hasError = false;
 
-    handleSearch() {
-      // 搜索结果实时响应
-      this.$nextTick(() => {
-        this.filteredTableData; // 触发计算属性重新计算
-      });
+      try {
+        // 向后端发送还书请求
+        const response = await axios.post("/api/book/return", {
+          bookId,
+          cardId,
+          borrowTime,
+        });
+        if (response.data.ok) {
+          this.$message.success("还书成功");
+          this.QueryBorrows(); // 刷新借书记录
+        } else {
+          this.$message.error(response.data.message);
+        }
+      } catch (error) {
+        console.error("还书失败:", error);
+        this.hasError = true;
+        this.$message.error("还书失败，请重试");
+      } finally {
+        this.isLoading = false;
+      }
     },
   },
 };

@@ -10,18 +10,6 @@
       "
     >
       借书证管理
-      <el-input
-        v-model="toSearch"
-        :prefix-icon="Search"
-        style="
-          width: 15vw;
-          min-width: 150px;
-          margin-left: 30px;
-          margin-right: 30px;
-          float: right;
-        "
-        clearable
-      />
     </div>
 
     <!-- 借书证卡片显示区 -->
