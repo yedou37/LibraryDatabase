@@ -1,6 +1,8 @@
 import entities.Book;
 import entities.Borrow;
 import entities.Card;
+import library.system.LibraryManagementSystem;
+
 import org.apache.commons.lang3.RandomUtils;
 import org.junit.Assert;
 import queries.ApiResult;
@@ -33,7 +35,7 @@ public class MyLibrary {
     }
 
     public static MyLibrary createLibrary(LibraryManagementSystem library, int nBooks,
-                                          int nCards, int nBorrows) {
+            int nCards, int nBorrows) {
         /* create books */
         Set<Book> bookSet = new HashSet<>();
         while (bookSet.size() < nBooks) {

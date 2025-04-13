@@ -1,3 +1,5 @@
+package library.system;
+
 import entities.Book;
 import entities.Borrow;
 import entities.Card;
@@ -10,6 +12,11 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+
+@Component
+@Service
 public class LibraryManagementSystemImpl implements LibraryManagementSystem {
 
     private final DatabaseConnector connector;
@@ -588,6 +595,35 @@ public class LibraryManagementSystemImpl implements LibraryManagementSystem {
             conn.commit();
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    @Override
+    public ApiResult modifyCardInfo(Card card) {
+        Connection conn = connector.getConn();
+        try {
+            conn.setAutoCommit(false);
+            PreparedStatement checkStmt = conn.prepareStatement("SELECT * FROM card WHERE card_id = ? FOR UPDATE");
+            checkStmt.setInt(1, card.getCardId());
+            ResultSet checkRes = checkStmt.executeQuery();
+            if (!checkRes.next()) {
+                throw new Exception("Card with ID " + card.getCardId() + " not found.");
+            }
+            PreparedStatement updateStmt = conn.prepareStatement(
+                    "UPDATE card SET name = ?, department = ?, type = ? WHERE card_id = ?");
+            updateStmt.setString(1, card.getName());
+            updateStmt.setString(2, card.getDepartment());
+            updateStmt.setString(3, card.getType().getStr());
+            updateStmt.setInt(4, card.getCardId());
+            int affectedRows = updateStmt.executeUpdate();
+            if (affectedRows == 0) {
+                throw new Exception("Failed to update card information.");
+            }
+            commit(conn);
+            return new ApiResult(true, "Card information updated successfully");
+        } catch (Exception e) {
+            rollback(conn);
+            return new ApiResult(false, e.getMessage());
         }
     }
 

@@ -7,7 +7,9 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.net.URL;
 import java.util.Map;
+import org.springframework.stereotype.Component;
 
+@Component
 public final class ConnectConfig {
 
     private final String host;

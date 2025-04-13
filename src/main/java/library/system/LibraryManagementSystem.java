@@ -1,3 +1,5 @@
+package library.system;
+
 import entities.Book;
 import entities.Borrow;
 import entities.Card;
@@ -7,19 +9,22 @@ import queries.BookQueryConditions;
 import java.sql.PreparedStatement;
 import java.util.List;
 
+import org.springframework.stereotype.Component;
+
+@Component
 /**
  * Note:
- *      (1) all functions in this interface will be regarded as a
- *          transaction. this means that after successfully completing
- *          all operations in a function, you need to call commit(),
- *          or call rollback() if one of the operations in a function fails.
- *          as an example, you can see {@link LibraryManagementSystemImpl#resetDatabase}
- *          to find how to use commit() and rollback().
- *      (2) for each function, you need to briefly introduce how to
- *          achieve this function and how to solve challenges in your
- *          lab report.
- *      (3) if you don't know what the function means, or what it is
- *          supposed to do, looking to the test code might help.
+ * (1) all functions in this interface will be regarded as a
+ * transaction. this means that after successfully completing
+ * all operations in a function, you need to call commit(),
+ * or call rollback() if one of the operations in a function fails.
+ * as an example, you can see {@link LibraryManagementSystemImpl#resetDatabase}
+ * to find how to use commit() and rollback().
+ * (2) for each function, you need to briefly introduce how to
+ * achieve this function and how to solve challenges in your
+ * lab report.
+ * (3) if you don't know what the function means, or what it is
+ * supposed to do, looking to the test code might help.
  */
 public interface LibraryManagementSystem {
 
@@ -29,10 +34,10 @@ public interface LibraryManagementSystem {
      * register a book to database.
      *
      * Note that:
-     *      (1) book_id should be stored to book after successfully
-     *          completing this operation.
-     *      (2) you should not register this book if the book already
-     *          exists in the library system.
+     * (1) book_id should be stored to book after successfully
+     * completing this operation.
+     * (2) you should not register this book if the book already
+     * exists in the library system.
      *
      * @param book all attributes of the book
      */
@@ -42,11 +47,11 @@ public interface LibraryManagementSystem {
      * increase the book's inventory by bookId & deltaStock.
      *
      * Note that:
-     *      (1) you need to check the correctness of book_id
-     *      (2) deltaStock can be negative, but make sure that
-     *          the result of book.stock + deltaStock is not negative!
+     * (1) you need to check the correctness of book_id
+     * (2) deltaStock can be negative, but make sure that
+     * the result of book.stock + deltaStock is not negative!
      *
-     * @param bookId book's book_id
+     * @param bookId     book's book_id
      * @param deltaStock increase count to book's stock, must be greater
      */
     ApiResult incBookStock(int bookId, int deltaStock);
@@ -55,15 +60,15 @@ public interface LibraryManagementSystem {
      * batch store books.
      *
      * Note that:
-     *      (1) you should not call the interface storeBook()
-     *          multiple times to achieve this function!!!
-     *          hint: use {@link PreparedStatement#executeBatch()}
-     *          and {@link PreparedStatement#addBatch()}
-     *      (2) if one of the books fails to import, all operations
-     *          should be rolled back using rollback() function provided
-     *          by JDBC!!!
-     *      (3) when binding params to SQL, you are required to avoid
-     *          the risk of SQL injection attack!!!
+     * (1) you should not call the interface storeBook()
+     * multiple times to achieve this function!!!
+     * hint: use {@link PreparedStatement#executeBatch()}
+     * and {@link PreparedStatement#addBatch()}
+     * (2) if one of the books fails to import, all operations
+     * should be rolled back using rollback() function provided
+     * by JDBC!!!
+     * (3) when binding params to SQL, you are required to avoid
+     * the risk of SQL injection attack!!!
      *
      * @param books list of books to be stored
      */
@@ -92,13 +97,13 @@ public interface LibraryManagementSystem {
      * query books according to different query conditions.
      *
      * Note that:
-     *      (1) you should let the DBMS to filter records
-     *          that do not satisfy the conditions instead of
-     *          filter records in your API.
-     *      (2) when binding params to SQL, you also need to avoid
-     *          the risk of SQL injection attack.
-     *      (3) [*] if all else is equal, sort by book_id in
-     *          ascending order!
+     * (1) you should let the DBMS to filter records
+     * that do not satisfy the conditions instead of
+     * filter records in your API.
+     * (2) when binding params to SQL, you also need to avoid
+     * the risk of SQL injection attack.
+     * (3) [*] if all else is equal, sort by book_id in
+     * ascending order!
      *
      * @param conditions query conditions
      *
@@ -171,5 +176,7 @@ public interface LibraryManagementSystem {
      * you are not allowed to complete & modify this function.
      */
     ApiResult resetDatabase();
+
+    ApiResult modifyCardInfo(Card card);
 
 }
