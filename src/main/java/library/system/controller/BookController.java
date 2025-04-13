@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RestController;
 
 import entities.Book;
+import entities.Borrow;
 import entities.Card;
 import library.system.LibraryManagementSystem;
 import library.system.LibraryManagementSystemImpl;
@@ -56,21 +57,21 @@ public class BookController {
         init();
     }
 
-    @GetMapping("/query")
-    public BookQueryResults queryBooks(@RequestBody BookQueryConditions queryConditions) {
+    @GetMapping("/book")
+    public BookQueryResults queryBooks(@ModelAttribute BookQueryConditions queryConditions) {
         try {
             // 查询图书
             ApiResult result = library.queryBook(queryConditions);
             if (!result.ok) {
-                throw new RuntimeException("Failed to query books: " + result.message);
+                throw new RuntimeException("查询图书失败: " + result.message);
             }
             return (BookQueryResults) result.payload;
         } catch (Exception e) {
-            throw new RuntimeException("Error querying books.", e);
+            throw new RuntimeException("查询图书时发生错误.", e);
         }
     }
 
-    @PostMapping("/add")
+    @PostMapping("/book/add")
     public ApiResult addBook(@RequestBody Book book) {
         try {
             // 添加图书
@@ -80,7 +81,7 @@ public class BookController {
         }
     }
 
-    @DeleteMapping("/delete/{bookId}")
+    @DeleteMapping("/book/delete/{bookId}")
     public ApiResult deleteBook(@PathVariable int bookId) {
         try {
             // 删除图书
@@ -90,13 +91,23 @@ public class BookController {
         }
     }
 
-    @PutMapping("/modify")
+    @PutMapping("/book/modify")
     public ApiResult modifyBook(@RequestBody Book book) {
         try {
             // 修改图书信息
             return library.modifyBookInfo(book);
         } catch (Exception e) {
             throw new RuntimeException("Error modifying book.", e);
+        }
+    }
+
+    @PostMapping("/book/incStock/{bookId}/{deltaStock}")
+    public ApiResult incBookStock(@PathVariable int bookId, @PathVariable int deltaStock) {
+        try {
+            // 增加图书库存
+            return library.incBookStock(bookId, deltaStock);
+        } catch (Exception e) {
+            throw new RuntimeException("Error increasing book stock.", e);
         }
     }
 
@@ -176,6 +187,28 @@ public class BookController {
             return res.getItems();
         } catch (Exception e) {
             throw new RuntimeException("Error showing borrow history.", e);
+        }
+    }
+
+    @PostMapping("/book/borrow")
+    public ApiResult borrowBook(@RequestBody Borrow borrow) {
+        try {
+            // 借阅图书
+            borrow.resetBorrowTime();
+            return library.borrowBook(borrow);
+        } catch (Exception e) {
+            throw new RuntimeException("Error borrowing book.", e);
+        }
+    }
+
+    @PostMapping("/book/return")
+    public ApiResult returnBook(@RequestBody Borrow borrow) {
+        try {
+            // 归还图书
+            borrow.resetReturnTime();
+            return library.returnBook(borrow);
+        } catch (Exception e) {
+            throw new RuntimeException("Error returning book.", e);
         }
     }
 }
