@@ -99,15 +99,7 @@ export default {
       isShow: false, // 结果表格展示状态
       isLoading: false, // 加载状态
       hasError: false, // 是否显示错误提示
-      tableData: [
-        {
-          // 初始示例数据
-          cardId: 1,
-          bookId: 1,
-          borrowTime: "2024.03.04 21:48",
-          returnTime: 0,
-        },
-      ],
+      tableData: [{}],
       toQuery: "", // 待查询内容(对某一借书证号进行查询)
       Search,
     };
@@ -117,11 +109,7 @@ export default {
       // 搜索结果实时响应
       return this.tableData.filter((record) => {
         if (this.toQuery === "") return true; // 搜索结果实时响应
-        return (
-          String(record.bookId).includes(this.toQuery) ||
-          String(record.borrowTime).includes(this.toQuery) ||
-          String(record.returnTime).includes(this.toQuery)
-        );
+        return String(record.cardId).includes(this.toQuery);
       });
     },
   },
@@ -129,13 +117,14 @@ export default {
     async QueryBorrows() {
       this.isLoading = true;
       this.hasError = false;
-      this.tableData = [];
+      this.tableData = []; // 清空 tableData
+      this.isShow = false; // 先隐藏表格
 
       try {
         // 将 cardID 作为路径变量传递
         const response = await axios.get(`/api/borrow/${this.toQuery}`);
-        this.tableData = response.data;
-        this.isShow = true;
+        this.tableData = response.data; // 更新 tableData
+        this.isShow = true; // 设置 isShow 为 true 以显示表格
       } catch (error) {
         console.error("查询失败:", error);
         this.hasError = true;
@@ -143,6 +132,7 @@ export default {
         this.isLoading = false;
       }
     },
+
     formatDate(unixTimestamp) {
       if (unixTimestamp === 0) {
         return "未归还";
