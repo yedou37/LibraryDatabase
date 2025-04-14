@@ -35,6 +35,10 @@
         >清空查询条件</el-button
       >
       <el-button type="success" @click="showAddBookDialog">添加图书</el-button>
+      <el-button type="info" @click="showBatchImportDialog"
+        >批量导入图书</el-button
+      >
+
       <el-button type="primary" @click="showBorrowDialog">借书</el-button>
     </div>
 
@@ -260,6 +264,34 @@
         </span>
       </template>
     </el-dialog>
+    <!-- 批量导入图书对话框 -->
+    <el-dialog
+      title="批量导入图书"
+      v-model="batchImportDialogVisible"
+      width="50%"
+    >
+      <el-form label-width="120px">
+        <el-form-item label="粘贴图书数据">
+          <el-input
+            type="textarea"
+            :rows="10"
+            v-model="batchBooksData"
+            placeholder="请粘贴图书数据，每行一个JSON对象"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="batchImportDialogVisible = false">取 消</el-button>
+          <el-button
+            type="primary"
+            :loading="isLoading"
+            @click="batchImportBooks"
+            >确 定</el-button
+          >
+        </span>
+      </template>
+    </el-dialog>
 
     <!-- 修改图书对话框 -->
     <el-dialog title="修改图书" v-model="modifyBookDialogVisible" width="30%">
@@ -360,6 +392,8 @@ export default {
         cardId: null,
         bookId: null,
       },
+      batchImportDialogVisible: false, // 批量导入图书对话框显示状态
+      batchBooksData: "", // 批量导入的图书数据
     };
   },
   computed: {
@@ -589,6 +623,68 @@ export default {
         ElMessage.error("借书失败，请重试");
       } finally {
         this.isLoading = false;
+      }
+    },
+
+    showBatchImportDialog() {
+      this.batchBooksData = ""; // 重置批量导入数据
+      this.batchImportDialogVisible = true; // 打开批量导入对话框
+    },
+    async batchImportBooks() {
+      this.isLoading = true;
+      this.hasError = false;
+
+      try {
+        const lines = this.batchBooksData
+          .split("\n")
+          .map((line) => line.trim())
+          .filter((line) => line);
+        const books = lines
+          .map((item) => {
+            try {
+              const book = JSON.parse(item);
+              // 验证每本书的基本字段
+              if (
+                !book.category ||
+                !book.title ||
+                !book.press ||
+                !book.publishYear ||
+                !book.author ||
+                !book.price ||
+                !book.stock
+              ) {
+                throw new Error(`缺少必需字段: ${item}`);
+              }
+              return book;
+            } catch (e) {
+              console.error("解析JSON失败:", e);
+              ElMessage.error(`解析JSON失败: ${e.message}`);
+              return null;
+            }
+          })
+          .filter((item) => item !== null);
+
+        if (books.length === 0) {
+          ElMessage.error("没有有效的图书数据");
+          this.isLoading = false;
+          return;
+        }
+
+        // 发送包含 books 数组的对象
+        const response = await axios.post("/api/book/batchAdd", books);
+        if (response.data.ok) {
+          ElMessage.success("图书批量导入成功");
+          this.QueryBooks(); // 重新查询图书信息
+        } else {
+          ElMessage.error(`批量导入图书失败: ${response.data.message}`);
+        }
+      } catch (error) {
+        console.error("批量导入图书失败:", error);
+        this.hasError = true;
+        ElMessage.error("批量导入图书失败，请检查数据格式或稍后再试");
+      } finally {
+        this.isLoading = false;
+        this.batchImportDialogVisible = false; // 关闭批量导入对话框
       }
     },
   },
