@@ -14,9 +14,9 @@
 \usepackage{hyperref}
 \usepackage{algorithm}
 
-\title{图书管理系统数据库实验报告}
-\author{作者姓名}
-\date{\today}
+\usepackage{tikz}
+\usetikzlibrary{er, positioning, arrows.meta}
+
 
 \lstset{
     language=Java,
@@ -32,12 +32,44 @@
 }
 
 \begin{document}
+\title{\fontsize{35pt}{\baselineskip}\selectfont\linespread{2}\selectfont{\textbf{基于MySQL的精简图书管理系统}}}
 
+\date{\huge{\today}}
+\author{\large\textbf{叶容宇 3230101885}}
 \maketitle
 
+\begin{figure}[ht]
+    \centering
+    \includegraphics[scale=0.5]{ZJU.jpg}
+\end{figure}
+
+\maketitle
+\newpage
+\tableofcontents
+\newpage
 \section{实验目的}
 本实验旨在设计并实现一个图书管理系统的数据库，该系统能够有效地管理图书、借阅者卡片以及借阅记录，并通过一系列的测试用例来验证系统的正确性和性能。
+最终目的是提供一个基于MySQL的精简图书管理程序，该图书管理程序应具备较好的可扩展性、鲁棒性和安全性，并且在高并发场景下仍能正确运行。
 
+\section{实验环境}
+
+本实验基于MySQL数据库，使用Java语言进行编程。
+
+前端使用Vue.js，后端使用Spring Boot框架。
+
+在Windows环境下
+
+启动后端
+
+\texttt{mvn spring-boot:run}
+
+启动前端（在librarymanagementsystem-frontend目录下）
+
+\texttt{npm run dev}
+
+运行所有的测试
+
+\texttt{mvn -Dtest=LibraryTest clean test}
 \section{项目文件结构}
 
 本项目采用Maven项目结构，主要包含以下几个模块：
@@ -249,9 +281,9 @@ public class LibraryManagementSystemImpl implements LibraryManagementSystem {
 
 \textbf{功能说明：}
 \begin{itemize}
-    \item 定义了处理图书相关请求的RESTful API。
+
     \item 使用\texttt{@RestController}注解标记为控制器。
-    \item 使用\texttt{@RequestMapping("/books")}定义了API的基路径。
+    \item 使用\texttt{@RequestMapping("/api")}定义了API的基路径。
 \end{itemize}
 
 \textbf{设计思路：}
@@ -320,4 +352,77 @@ public class BookController {
     [INFO]
 \end{lstlisting}
 
+\subsection{前后端交互}
+\subsubsection{图书查询 出借 注册}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{pic1.png}
+    \caption{图书查询界面}
+    \label{fig:book-query-borrow-register}
+\end{figure}
+提供按条件查询按钮。提供导入单本或者批量导入的支持
+\subsubsection{借书卡管理}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{pic2.png}
+    \caption{借书卡管理界面}
+    \label{fig:library-card-management}
+\end{figure}
+查询所有的借书卡，编辑、删除、新增借书卡。
+\newpage
+\subsubsection{借阅历史}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{pic3.png}
+    \caption{借阅历史界面}
+    \label{fig:borrowing-history}
+\end{figure}
+可以根据借书卡号查找借阅历史，并且可以手动归还书籍。
+
+\section{思考题}
+\begin{tikzpicture}[>=Stealth, node distance=1cm]
+    % 定义实体
+    \node[entity] (book) {Book (书籍)};
+    \node[attribute] (book_id) [below left=of book] {book\_id (主键)} edge (book);
+    \node[attribute] (category) [below=of book] {category} edge (book);
+    \node[attribute] (title) [below right=of book] {title} edge (book);
+    \node[attribute] (press) [right=of book] {press} edge (book);
+    \node[attribute] (publish_year) [above right=of book] {publish\_year} edge (book);
+    \node[attribute] (author) [above=of book] {author} edge (book);
+    \node[attribute] (price) [above left=of book] {price (默认: 0.00)} edge (book);
+    \node[attribute] (stock) [left=of book] {stock (默认: 0)} edge (book);
+
+    \node[entity] (card) [below=7cm of book] {Card (借书卡)};
+    \node[attribute] (card_id) [below left=of card] {card\_id (主键)} edge (card);
+    \node[attribute] (name) [below=of card] {name} edge (card);
+    \node[attribute] (department) [below right=of card] {department} edge (card);
+    \node[attribute] (type) [right=of card] {type ('T' 或 'S')} edge (card);
+
+    \node[entity] (borrow) [below=3cm of book] {Borrow (借阅记录)};
+    \node[attribute] (borrow_card_id) [below left=of borrow] {card\_id (外键)} edge (borrow);
+    \node[attribute] (borrow_book_id) [left=of borrow] {book\_id (外键)} edge (borrow);
+    \node[attribute] (borrow_time) [below right=of borrow] {borrow\_time (主键)} edge (borrow);
+    \node[attribute] (return_time) [right=of borrow] {return\_time (默认: 0)} edge (borrow);
+
+    % 定义关系
+    \draw[<->] (book) -- node[above] {1:N} (borrow);
+    \draw[<->] (card) -- node[above] {N:1} (borrow);
+
+
+ 
+\end{tikzpicture}
+
+
+\textit{图书管理系统中可能遭受SQL注入攻击的模块：}
+
+借阅模块：用户输入借阅信息时，如果输入验证不严格，可能会被注入恶意SQL代码。
+登录和注册模块：用户输入用户名和密码时，如果对输入的特殊字符处理不当，可能会被注入恶意SQL代码。
+搜索功能模块：用户输入搜索条件时，如果直接拼接到SQL语句中，可能会被注入恶意SQL代码。
+
+解决方法：使用预编译语句（Prepared Statements）或参数化查询：通过预编译SQL语句，将用户输入的内容作为参数而不是直接拼接在SQL语句中，从而防止SQL注入。
+
+\textit{在InnoDB的默认隔离级别(RR, Repeated Read)下，当出现并发访问时，如何保证借书结果的正确性？}
+
+使用事务：对于借书操作，应将其放在事务中，确保借书、减少库存、记录借阅信息等操作要么全部成功，要么全部失败。
+锁机制：在事务中使用锁机制，比如SELECT ... FOR UPDATE，可以锁定正在被查询的记录，防止其他事务对这些记录进行修改，直到当前事务提交或回滚。
 \end{document}

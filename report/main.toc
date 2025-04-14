@@ -1,0 +1,15 @@
+\contentsline {section}{\numberline {1}实验目的}{3}{section.1}%
+\contentsline {section}{\numberline {2}实验环境}{3}{section.2}%
+\contentsline {section}{\numberline {3}项目文件结构}{3}{section.3}%
+\contentsline {section}{\numberline {4}文件作用说明}{4}{section.4}%
+\contentsline {subsection}{\numberline {4.1}\texttt {config/CorsConfig.java}}{4}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}\texttt {src/main/java/library/system/LibraryManagementSystem.java}}{5}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}\texttt {src/main/java/library/system/LibraryManagementSystemImpl.java}}{6}{subsection.4.3}%
+\contentsline {subsection}{\numberline {4.4}\texttt {src/main/java/library/system/controller/BookController.java}}{9}{subsection.4.4}%
+\contentsline {section}{\numberline {5}实验结果}{10}{section.5}%
+\contentsline {subsection}{\numberline {5.1}测试用例验证}{10}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}前后端交互}{11}{subsection.5.2}%
+\contentsline {subsubsection}{\numberline {5.2.1}图书查询 出借 注册}{11}{subsubsection.5.2.1}%
+\contentsline {subsubsection}{\numberline {5.2.2}借书卡管理}{11}{subsubsection.5.2.2}%
+\contentsline {subsubsection}{\numberline {5.2.3}借阅历史}{12}{subsubsection.5.2.3}%
+\contentsline {section}{\numberline {6}思考题}{13}{section.6}%

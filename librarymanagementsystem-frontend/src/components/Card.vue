@@ -42,10 +42,8 @@
             </p>
           </div>
 
-          <el-divider />
-
           <!-- 卡片操作 -->
-          <div style="margin-top: 10px">
+          <div class="card-actions">
             <el-button
               type="primary"
               :icon="Edit"
@@ -394,6 +392,14 @@ export default {
   padding: 7.5px;
   padding-right: 10px;
   padding-top: 15px;
+}
+/* 定义卡片操作区域 */
+.card-actions {
+  display: flex;
+  justify-content: center; /* 水平居中 */
+  align-items: center; /* 垂直居中 */
+  margin-top: 10px; /* 调整间距 */
+  margin-bottom: 10px; /* 调整间距 */
 }
 
 .newCardBox {
