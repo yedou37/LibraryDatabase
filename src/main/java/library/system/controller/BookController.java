@@ -8,6 +8,7 @@ import queries.CardList;
 import utils.ConnectConfig;
 import utils.DatabaseConnector;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -211,4 +212,18 @@ public class BookController {
             throw new RuntimeException("Error returning book.", e);
         }
     }
+
+    @PostMapping("/book/batchAdd")
+    public ApiResult batchAddBooks(@RequestBody List<Book> books) {
+        if (books == null || books.isEmpty()) {
+            return new ApiResult(false, "图书列表为空");
+        }
+
+        try {
+            return library.storeBook(books);
+        } catch (Exception e) {
+            return new ApiResult(false, "批量添加图书失败: " + e.getMessage());
+        }
+    }
+
 }
